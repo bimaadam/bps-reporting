@@ -1,7 +1,13 @@
 <?php
 session_start();
 
-require '../service/database.php';
+// Koneksi ke database
+$conn = new mysqli("localhost", "root", "", "db_kerja");
+
+// Cek koneksi
+if ($conn->connect_error) {
+    die("Koneksi gagal: " . $conn->connect_error);
+}
 
 // Ambil data dari form
 $username = $_POST['username'];
@@ -17,16 +23,16 @@ $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $row = $result->fetch_assoc();
     
-    // Cek password tanpa hash di database
+    // Cek password (tanpa hash dulu ya, biar gampang test)
     if ($password === $row['password']) {
         $_SESSION['username'] = $username;
-        header("Location: ../index.php");
+        header("Location: ../index.php"); // ganti ke halaman dashboard lo
         exit();
     } else {
-        echo "Password salah cok!";
+        echo "Password salah";
     }
 } else {
-    echo "User gak ada kontol!";
+    echo "User gak ada";
 }
 
 $stmt->close();

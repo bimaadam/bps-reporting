@@ -801,7 +801,7 @@
     <div
       class="modal fade"
       id="logoutModal"
-      tabindex="-1"
+      tabindex="-1"`
       role="dialog"
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
@@ -820,7 +820,7 @@
             </button>
           </div>
           <div class="modal-body">
-            Select "Logout" below if you are ready to end your current session.
+            Yakin anda mau keluar ?
           </div>
           <div class="modal-footer">
             <button
@@ -830,7 +830,7 @@
             >
               Cancel
             </button>
-            <a class="btn btn-primary" href="login.html">Logout</a>
+            <a href="api/logout.php" class="btn btn-danger">Logout</a>
           </div>
         </div>
       </div>
