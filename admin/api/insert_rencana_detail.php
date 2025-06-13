@@ -46,7 +46,7 @@ try {
     $usulan_anggaran = (float)$_POST['usulan_anggaran'];
 
     $stmt->bind_param(
-        "ssiiiisssid",  
+        "ssssssssiid",
         $tahun,         
         $tanggal_kegiatan, 
         $kode_program,
@@ -59,6 +59,7 @@ try {
         $mitra,
         $usulan_anggaran
     );
+    
     
     if ($stmt->execute()) {
         echo json_encode([
