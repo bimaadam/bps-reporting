@@ -1,21 +1,34 @@
 <?php
 include "service/database.php";
 
-if (isset($_POST['oke'])) {
-    $kode_program = mysqli_real_escape_string($koneksi, $_POST['kode_program']);
-    $kode_kegiatan = mysqli_real_escape_string($koneksi, $_POST['kode_kegiatan']);
+if (isset($_POST['simpan'])) {
+    $kode_program = $_POST['kode_program'];
+    $kode_kegiatan = $_POST['kode_kegiatan'];
+    $kode_kro = $_POST['kode_kro'];
+    $kode_ro = $_POST['kode_ro'];
+    $nama_kegiatan = $_POST['nama_kegiatan'];
+    $nama_aktivitas = $_POST['nama_aktivitas'];
+    $organik = $_POST['organik'];
+    $mitra = $_POST['mitra'];
+    $usulan_anggaran = $_POST['usulan_anggaran'];
 
-    $query = "INSERT INTO tbl_aktivitas (kode_program, kode_kegiatan) VALUES (?, ?)";
-    $stmt = mysqli_prepare($koneksi, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $kode_program, $kode_kegiatan);
+    $query = "INSERT INTO tbl_realisasi_anggaran (
+        tahun_kegiatan, bulan_kegiatan, bulan_realisasi,
+        kode_program, kode_kegiatan, kode_kro, kode_ro,
+        nama_kegiatan, nama_aktivitas,
+        organik, mitra, usulan_anggaran
+    ) VALUES (
+        '$tahun_kegiatan', '$bulan_kegiatan', '$bulan_realisasi',
+        '$kode_program', '$kode_kegiatan', '$kode_kro', '$kode_ro',
+        '$nama_kegiatan', '$nama_aktivitas',
+        '$organik', '$mitra', '$usulan_anggaran'
+    )";
 
-    if (mysqli_stmt_execute($stmt)) {
-        echo "<script>alert('Data berhasil disimpan!'); window.location.href='input_aktivitas.php';</script>";
+    if (mysqli_query($koneksi, $query)) {
+        echo "<script>alert('✅ Data berhasil disimpan!'); window.location.href='input_realisasi.php';</script>";
     } else {
-        echo "<script>alert('Gagal menyimpan data: " . mysqli_error($koneksi) . "');</script>";
+        echo "<script>alert('❌ Gagal simpan data: " . mysqli_error($koneksi) . "');</script>";
     }
-
-    mysqli_stmt_close($stmt);
 }
 ?>
 
@@ -23,12 +36,12 @@ if (isset($_POST['oke'])) {
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class="h3 mb-4 text-gray-800">Input Aktivitas</h1>
+    <h1 class="h3 mb-4 text-gray-800">Input Realisasi</h1>
 
     <!-- Form Aktivitas -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Form Aktivitas</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Form Realisai</h6>
         </div>
         <div class="card-body">
             <form id="aktivitasForm" method="POST">
@@ -37,7 +50,7 @@ if (isset($_POST['oke'])) {
                     <select id="kode_program" name="kode_program" class="form-control" required>
                         <option value="" disabled selected>Pilih Program</option>
                         <?php 
-                        $query = mysqli_query($koneksi, "SELECT * FROM tbl_program1");
+                        $query = mysqli_query($koneksi, "SELECT * FROM tbl_rencana_anggaran");
                         while ($data = mysqli_fetch_array($query)) {
                             echo "<option value='{$data['kode_program']}'>{$data['kode_program']}</option>";
                         }
@@ -61,18 +74,10 @@ if (isset($_POST['oke'])) {
     <!-- Tabel Kegiatan -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Kegiatan Terpilih</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Realisasi Terpilih</h6>
         </div>
         <div class="card-body">
             <table class="table table-bordered" id="aktivitasTable">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>RO</th>
-                        <th>Uraian</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
                 <tbody>
                     <tr id="noDataRow">
                         <td colspan="4" class="text-center">Belum ada data</td>
@@ -83,22 +88,18 @@ if (isset($_POST['oke'])) {
     </div>
 </div>
 
-<!-- Modal Tambah -->
-<div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="tambahModalLabel">Tambah Data</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Tutup">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <?php include "modal_form_rencana.php"; ?>
-            </div>
-        </div>
-    </div>
-</div>
+<form method="POST" action="input_realisasi.php">
+  <input type="hidden" name="kode_program" value="3201">
+  <input type="hidden" name="kode_kegiatan" value="320101">
+  <input type="hidden" name="kode_kro" value="32010101">
+  <input type="hidden" name="kode_ro" value="3201010101">
+  <input type="hidden" name="nama_kegiatan" value="Kegiatan Edukasi Warga">
+  <input type="hidden" name="nama_aktivitas" value="Penyuluhan Kesehatan">
+  <input type="hidden" name="organik" value="12">
+  <input type="hidden" name="mitra" value="8">
+  <input type="hidden" name="usulan_anggaran" value="20000000">
+</form>
+
 
 <!-- jQuery harus sebelum Bootstrap -->
 <script src="js/jquery.min.js"></script>
@@ -118,7 +119,7 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: 'api/get_ro.php',
+            url: 'api/get_rencana.php',
             method: 'POST',
             data: {
                 kode_program: kode_program,
@@ -134,7 +135,7 @@ $(document).ready(function () {
     $('#kode_program').change(function () {
         const kode_program = $(this).val();
         $.ajax({
-            url: 'api/get_kegiatan.php',
+            url: 'api/get_kegiatan_rencana.php',
             method: 'POST',
             data: { kode_program },
             success: function (response) {
@@ -154,10 +155,36 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '.tambahBtn', function () {
-        const id = $(this).data('id');
-        $('#tambahModal').modal('show');
-        $('#tambahModalLabel').text('Tambah Data untuk ID: ' + id);
+    const data = {
+        kode_program: $(this).data('kode_program'),
+        kode_kegiatan: $(this).data('kode_kegiatan'),
+        kode_kro: $(this).data('kode_kro'),
+        kode_ro: $(this).data('kode_ro'),
+        nama_kegiatan: $(this).data('nama_kegiatan'),
+        nama_aktivitas: $(this).data('nama_aktivitas'),
+        organik: $(this).data('organik'),
+        mitra: $(this).data('mitra'),
+        usulan_anggaran: $(this).data('usulan_anggaran')
+    };
+
+const params = new URLSearchParams(data).toString();
+window.location.href = `input_realisasi.php?${params}`;
+
+
+    $.ajax({
+        url: 'input_realisasi.php',
+        type: 'POST',
+        data: data,
+        success: function () {
+            alert('✅ Data berhasil dimasukkan');
+            loadTable(); // reload isi tabel realisasi
+        },
+        error: function () {
+            alert('❌ Gagal menambahkan data');
+        }
     });
+});
+
 
     $(document).on('click', '.editBtn', function () {
         const id = $(this).data('id');

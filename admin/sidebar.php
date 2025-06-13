@@ -72,12 +72,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <span>Realisasi</span>
     </a>
 </li>
-<!-- <li class="nav-item <?= $current_page == 'form_rencana.php' ? 'active' : '' ?>">
-    <a class="nav-link" href="form_rencana.php">
+<li class="nav-item <?= $current_page == 'input_realisasi.php' ? 'active' : '' ?>">
+    <a class="nav-link" href="input_realisasi.php">
         <i class="fas fa-fw fa-book"></i>
-        <span>Form Rencana</span>
+        <span>Input Realisasi</span>
     </a>
-</li> -->
+</li>
    
 
     <!-- Divider -->
