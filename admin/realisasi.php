@@ -64,6 +64,16 @@ if (isset($_POST['simpan'])) {
                         <option value="" disabled selected>Pilih Kegiatan</option>
                     </select>
                 </div>
+                <!-- input hide search params -->
+                <input type="text" name="kode_kegiatan" value="<?= $_GET['kode_kegiatan'] ?? '' ?>">
+<input type="text" name="kode_kro" value="<?= $_GET['kode_kro'] ?? '' ?>">
+<input type="text" name="kode_ro" value="<?= $_GET['kode_ro'] ?? '' ?>">
+<input type="text" name="nama_kegiatan" value="<?= $_GET['nama_kegiatan'] ?? '' ?>">
+<input type="text" name="nama_aktivitas" value="<?= $_GET['nama_aktivitas'] ?? '' ?>">
+<input type="text" name="organik" value="<?= $_GET['organik'] ?? '' ?>">
+<input type="text" name="mitra" value="<?= $_GET['mitra'] ?? '' ?>">
+<input type="text" name="usulan_anggaran" value="<?= $_GET['usulan_anggaran'] ?? '' ?>">
+
 
                 <button type="button" id="okeBtn" class="btn btn-primary">OK</button>
                 <button type="reset" class="btn btn-secondary">Cancel</button>
@@ -87,18 +97,6 @@ if (isset($_POST['simpan'])) {
         </div>
     </div>
 </div>
-
-<form method="POST" action="input_realisasi.php">
-  <input type="hidden" name="kode_program" value="3201">
-  <input type="hidden" name="kode_kegiatan" value="320101">
-  <input type="hidden" name="kode_kro" value="32010101">
-  <input type="hidden" name="kode_ro" value="3201010101">
-  <input type="hidden" name="nama_kegiatan" value="Kegiatan Edukasi Warga">
-  <input type="hidden" name="nama_aktivitas" value="Penyuluhan Kesehatan">
-  <input type="hidden" name="organik" value="12">
-  <input type="hidden" name="mitra" value="8">
-  <input type="hidden" name="usulan_anggaran" value="20000000">
-</form>
 
 
 <!-- jQuery harus sebelum Bootstrap -->
