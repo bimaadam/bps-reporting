@@ -32,53 +32,53 @@ $current_page = basename($_SERVER['PHP_SELF']);
         Menu Input
     </div>
     <li class="nav-item <?= $current_page == 'input-program.php' ? 'active' : '' ?>">
-    <a class="nav-link" href="input-program.php">
-        <i class="fas fa-fw fa-table"></i>
-        <span>Input Program</span>
-    </a>
-</li>
+        <a class="nav-link" href="input-program.php">
+            <i class="fas fa-fw fa-table"></i>
+            <span>Input Program</span>
+        </a>
+    </li>
 
-<li class="nav-item <?= $current_page == 'input-kro.php' ? 'active' : '' ?>">
-    <a class="nav-link" href="input-kro.php">
-        <i class="fas fa-fw fa-tasks"></i>
-        <span>Input KRO</span>
-    </a>
-</li>
+    <li class="nav-item <?= $current_page == 'input-kro.php' ? 'active' : '' ?>">
+        <a class="nav-link" href="input-kro.php">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Input KRO</span>
+        </a>
+    </li>
 
-<li class="nav-item <?= $current_page == 'input-kegiatan.php' ? 'active' : '' ?>">
-    <a class="nav-link" href="input-kegiatan.php">
-        <i class="fas fa-fw fa-pencil-alt"></i>
-        <span>Input Kegiatan</span>
-    </a>
-</li>
+    <li class="nav-item <?= $current_page == 'input-kegiatan.php' ? 'active' : '' ?>">
+        <a class="nav-link" href="input-kegiatan.php">
+            <i class="fas fa-fw fa-pencil-alt"></i>
+            <span>Input Kegiatan</span>
+        </a>
+    </li>
 
-<li class="nav-item <?= $current_page == 'input-ro.php' ? 'active' : '' ?>">
-    <a class="nav-link" href="input-ro.php">
-        <i class="fas fa-fw fa-chart-line"></i>
-        <span>Input RO</span>
-    </a>
-</li>
+    <li class="nav-item <?= $current_page == 'input-ro.php' ? 'active' : '' ?>">
+        <a class="nav-link" href="input-ro.php">
+            <i class="fas fa-fw fa-chart-line"></i>
+            <span>Input RO</span>
+        </a>
+    </li>
 
-<li class="nav-item <?= $current_page == 'rencana.php' ? 'active' : '' ?>">
-    <a class="nav-link" href="rencana.php">
-        <i class="fas fa-fw fa-list"></i>
-        <span>Rencana</span>
-    </a>
-</li>
+    <li class="nav-item <?= $current_page == 'rencana.php' ? 'active' : '' ?>">
+        <a class="nav-link" href="rencana.php">
+            <i class="fas fa-fw fa-list"></i>
+            <span>Rencana</span>
+        </a>
+    </li>
 
-<li class="nav-item <?= $current_page == 'realisasi.php' ? 'active' : '' ?>">
-    <a class="nav-link" href="realisasi.php">
-        <i class="fas fa-fw fa-pencil-alt"></i>
-        <span>Realisasi</span>
-    </a>
-</li>
-<li class="nav-item <?= $current_page == 'input_realisasi.php' ? 'active' : '' ?>">
+    <li class="nav-item <?= $current_page == 'realisasi.php' ? 'active' : '' ?>">
+        <a class="nav-link" href="realisasi.php">
+            <i class="fas fa-fw fa-pencil-alt"></i>
+            <span>Realisasi</span>
+        </a>
+    </li>
+    <!-- <li class="nav-item <?= $current_page == 'input_realisasi.php' ? 'active' : '' ?>">
     <a class="nav-link" href="input_realisasi.php">
         <i class="fas fa-fw fa-book"></i>
         <span>Input Realisasi</span>
     </a>
-</li>
-   
+</li> -->
+
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

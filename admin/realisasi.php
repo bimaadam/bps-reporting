@@ -44,13 +44,13 @@ if (isset($_POST['simpan'])) {
             <h6 class="m-0 font-weight-bold text-primary">Form Realisai</h6>
         </div>
         <div class="card-body">
-            <form id="aktivitasForm" method="POST">
+            <form id="realisasiForm" method="POST">
                 <div class="form-group">
                     <label for="kode_program">Program</label>
                     <select id="kode_program" name="kode_program" class="form-control" required>
                         <option value="" disabled selected>Pilih Program</option>
-                        <?php 
-                        $query = mysqli_query($koneksi, "SELECT * FROM tbl_rencana_anggaran");
+                        <?php
+                        $query = mysqli_query($koneksi, "SELECT * FROM tbl_program1");
                         while ($data = mysqli_fetch_array($query)) {
                             echo "<option value='{$data['kode_program']}'>{$data['kode_program']}</option>";
                         }
@@ -64,15 +64,18 @@ if (isset($_POST['simpan'])) {
                         <option value="" disabled selected>Pilih Kegiatan</option>
                     </select>
                 </div>
+
                 <!-- input hide search params -->
-                <input type="text" name="kode_kegiatan" value="<?= $_GET['kode_kegiatan'] ?? '' ?>">
-<input type="text" name="kode_kro" value="<?= $_GET['kode_kro'] ?? '' ?>">
-<input type="text" name="kode_ro" value="<?= $_GET['kode_ro'] ?? '' ?>">
-<input type="text" name="nama_kegiatan" value="<?= $_GET['nama_kegiatan'] ?? '' ?>">
-<input type="text" name="nama_aktivitas" value="<?= $_GET['nama_aktivitas'] ?? '' ?>">
-<input type="text" name="organik" value="<?= $_GET['organik'] ?? '' ?>">
-<input type="text" name="mitra" value="<?= $_GET['mitra'] ?? '' ?>">
-<input type="text" name="usulan_anggaran" value="<?= $_GET['usulan_anggaran'] ?? '' ?>">
+                <input hidden type="text" name="tahun_kegiatan" value="<?= $_GET['tahun_kegiatan'] ?? date('Y') ?>">
+                <input hidden type="text" name="bulan_kegiatan" value="<?= $_GET['bulan_kegiatan'] ?? date('m') ?>">
+                <input hidden type="text" name="kode_kegiatan" value="<?= $_GET['kode_kegiatan'] ?? '' ?>">
+                <input hidden type="text" name="kode_kro" value="<?= $_GET['kode_kro'] ?? '' ?>">
+                <input hidden type="text" name="kode_ro" value="<?= $_GET['kode_ro'] ?? '' ?>">
+                <input hidden type="text" name="nama_kegiatan" value="<?= $_GET['nama_kegiatan'] ?? '' ?>">
+                <input hidden type="text" name="nama_aktivitas" value="<?= $_GET['nama_aktivitas'] ?? '' ?>">
+                <input hidden type="text" name="organik" value="<?= $_GET['organik'] ?? '' ?>">
+                <input hidden type="text" name="mitra" value="<?= $_GET['mitra'] ?? '' ?>">
+                <input hidden type="text" name="usulan_anggaran" value="<?= $_GET['usulan_anggaran'] ?? '' ?>">
 
 
                 <button type="button" id="okeBtn" class="btn btn-primary">OK</button>
@@ -105,104 +108,110 @@ if (isset($_POST['simpan'])) {
 
 <!-- AJAX Logic -->
 <script>
-$(document).ready(function () {
+    $(document).ready(function() {
 
-    function loadTable(page = 1) {
-        const kode_program = $('#kode_program').val();
-        const kode_kegiatan = $('#kode_kegiatan').val();
+        function loadTable(page = 1) {
+            const kode_program = $('#kode_program').val();
+            const kode_kegiatan = $('#kode_kegiatan').val();
 
-        if (!kode_program || !kode_kegiatan) {
-            alert("Silakan pilih program dan kegiatan!");
-            return;
-        }
-
-        $.ajax({
-            url: 'api/get_rencana.php',
-            method: 'POST',
-            data: {
-                kode_program: kode_program,
-                kode_kegiatan: kode_kegiatan,
-                page: page
-            },
-            success: function (response) {
-                $('#aktivitasTable tbody').html(response);
+            if (!kode_program || !kode_kegiatan) {
+                alert("Silakan pilih program dan kegiatan!");
+                return;
             }
-        });
-    }
 
-    $('#kode_program').change(function () {
-        const kode_program = $(this).val();
-        $.ajax({
-            url: 'api/get_kegiatan_rencana.php',
-            method: 'POST',
-            data: { kode_program },
-            success: function (response) {
-                $('#kode_kegiatan').html(response);
-            }
-        });
-    });
-
-    $('#okeBtn').on('click', function () {
-        loadTable();
-    });
-
-    $(document).on('click', '.pagination-link', function (e) {
-        e.preventDefault();
-        const page = $(this).data('page');
-        loadTable(page);
-    });
-
-    $(document).on('click', '.tambahBtn', function () {
-    const data = {
-        kode_program: $(this).data('kode_program'),
-        kode_kegiatan: $(this).data('kode_kegiatan'),
-        kode_kro: $(this).data('kode_kro'),
-        kode_ro: $(this).data('kode_ro'),
-        nama_kegiatan: $(this).data('nama_kegiatan'),
-        nama_aktivitas: $(this).data('nama_aktivitas'),
-        organik: $(this).data('organik'),
-        mitra: $(this).data('mitra'),
-        usulan_anggaran: $(this).data('usulan_anggaran')
-    };
-
-const params = new URLSearchParams(data).toString();
-window.location.href = `input_realisasi.php?${params}`;
-
-
-    $.ajax({
-        url: 'input_realisasi.php',
-        type: 'POST',
-        data: data,
-        success: function () {
-            alert('✅ Data berhasil dimasukkan');
-            loadTable(); // reload isi tabel realisasi
-        },
-        error: function () {
-            alert('❌ Gagal menambahkan data');
-        }
-    });
-});
-
-
-    $(document).on('click', '.editBtn', function () {
-        const id = $(this).data('id');
-        alert('Edit data dengan ID: ' + id);
-    });
-
-    $(document).on('click', '.deleteBtn', function () {
-        const id = $(this).data('id');
-        if (confirm('Yakin mau hapus data ini?')) {
             $.ajax({
-                url: 'delete_ro.php',
+                url: 'api/get_rencana.php',
                 method: 'POST',
-                data: { id },
-                success: function (response) {
-                    alert(response);
-                    loadTable();
+                data: {
+                    kode_program: kode_program,
+                    kode_kegiatan: kode_kegiatan,
+                    page: page
+                },
+                success: function(response) {
+                    $('#aktivitasTable tbody').html(response);
                 }
             });
         }
-    });
 
-});
+        $('#kode_program').change(function() {
+            const kode_program = $(this).val();
+            $.ajax({
+                url: 'api/get_kegiatan.php',
+                method: 'POST',
+                data: {
+                    kode_program
+                },
+                success: function(response) {
+                    $('#kode_kegiatan').html(response);
+                }
+            });
+        });
+
+        $('#okeBtn').on('click', function() {
+            loadTable();
+        });
+
+        $(document).on('click', '.pagination-link', function(e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            loadTable(page);
+        });
+
+        $(document).on('click', '.tambahBtn', function() {
+            const data = {
+                tahun_kegiatan: $(this).data('tahun_kegiatan'),
+                bulan_kegiatan: $(this).data('bulan_kegiatan'),
+                kode_program: $(this).data('kode_program'),
+                kode_kegiatan: $(this).data('kode_kegiatan'),
+                kode_kro: $(this).data('kode_kro'),
+                kode_ro: $(this).data('kode_ro'),
+                nama_kegiatan: $(this).data('nama_kegiatan'),
+                nama_aktivitas: $(this).data('nama_aktivitas'),
+                organik: $(this).data('organik'),
+                mitra: $(this).data('mitra'),
+                usulan_anggaran: $(this).data('usulan_anggaran')
+            };
+
+            const params = new URLSearchParams(data).toString();
+            window.location.href = `input_realisasi.php?${params}`;
+
+
+            $.ajax({
+                url: 'input_realisasi.php',
+                type: 'POST',
+                data: data,
+                success: function() {
+                    alert('✅ Data berhasil dimasukkan');
+                    loadTable(); // reload isi tabel realisasi
+                },
+                error: function() {
+                    alert('❌ Gagal menambahkan data');
+                }
+            });
+        });
+
+
+        $(document).on('click', '.editBtn', function() {
+            const id = $(this).data('id');
+            alert('Edit data dengan ID: ' + id);
+        });
+
+        $(document).on('click', '.deleteBtn', function() {
+            const id = $(this).data('id');
+            if (confirm('Yakin mau hapus data ini?')) {
+                $.ajax({
+                    url: 'delete_ro.php',
+                    method: 'POST',
+                    data: {
+                        id
+                    },
+                    success: function(response) {
+                        alert(response);
+                        loadTable();
+                    }
+                });
+            }
+        });
+
+    });
 </script>

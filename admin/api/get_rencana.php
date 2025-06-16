@@ -1,7 +1,7 @@
 <?php
 include '../service/database.php';
 
-$limit = 10; 
+$limit = 10;
 $page = isset($_POST['page']) ? $_POST['page'] : 1;
 $start = ($page - 1) * $limit;
 

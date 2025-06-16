@@ -1,117 +1,171 @@
 <?php
-include "service/database.php";
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
+// parameter GET data
+$required_params = ['tahun_kegiatan', 'bulan_kegiatan', 'kode_program', 'kode_kegiatan', 'kode_kro', 'kode_ro'];
+foreach ($required_params as $param) {
+    if (!isset($_GET[$param]) || empty($_GET[$param])) {
+        die("Parameter $param tidak valid");
+    }
+}
 
+$tahun = $_GET['tahun_kegiatan'] ?? date('Y');
+$bulan = $_GET['bulan_kegiatan'] ?? date('m');
+$kode_program = $_GET['kode_program'] ?? '';
+$kode_kegiatan = $_GET['kode_kegiatan'] ?? '';
+$kode_kro = $_GET['kode_kro'] ?? '';
+$kode_ro = $_GET['kode_ro'] ?? '';
+
+require_once 'service/aktivitas_bulanan.php';
+require_once 'service/database.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nama_kegiatan    = $_POST['nama_kegiatan'];
+    $nama_aktivitas   = $_POST['nama_aktivitas'];
+    $organik          = $_POST['organik'];
+    $mitra            = $_POST['mitra'];
+    $usulan_anggaran  = $_POST['usulan_anggaran'];
+    $realisasi_anggaran = $_POST['realisasi_anggaran'];
+    $keterangan = $_POST['input_text_file'];
+
+    $stmt = $koneksi->prepare("
+        INSERT INTO tbl_realisasi_anggaran 
+        (tahun_kegiatan, bulan_kegiatan, bulan_realisasi, kode_program, kode_kegiatan, kode_kro, kode_ro, nama_kegiatan, nama_aktivitas, organik, mitra, usulan_anggaran, realisasi_anggaran, kendala, solusi, input_text_file) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $bulan_realisasi = $bulan;
+
+    $stmt->bind_param(
+        "iiisssssssiisss",
+        $tahun,
+        $bulan,
+        $bulan_realisasi,
+        $kode_program,
+        $kode_kegiatan,
+        $kode_kro,
+        $kode_ro,
+        $nama_kegiatan,
+        $nama_aktivitas,
+        $organik,
+        $mitra,
+        $usulan_anggaran,
+        $realisasi_anggaran,
+        $kendala,
+        $solusi,
+        $keterangan
+    );
+
+    if ($stmt->execute()) {
+        echo "<script>alert('✅ Data berhasil disimpan!'); window.location.href='input_aktivitas.php';</script>";
+    } else {
+        echo "<script>alert('❌ Gagal simpan data: " . $stmt->error . "');</script>";
+    }
+
+    $stmt->close();
+}
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
-<body id="page-top">
+<head>
+    <meta charset="UTF-8">
+    <title>Input Realisasi Anggaran</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-    <!-- Page Wrapper -->
-    <div id="wrapper">
+<body>
 
-
-        <!-- Content Wrapper -->
+    <div id="content">
         <div id="content-wrapper" class="d-flex flex-column">
+            <?php include("header.php"); ?>
 
-            <!-- Main Content -->
-            <div id="content">
+            <!-- Form Rencana -->
+            <div class="card shadow mb-4 mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Form Realisasi</h6>
+                </div>
 
-                <?php include("header.php"); ?>
+                <div class="card-body">
+                    <form id="rencanaForm" method="POST" action="api/insert_realisasi.php">
+                        <!-- Tambahkan input hidden untuk parameter GET -->
+                        <input type="hidden" name="tahun_kegiatan" value="<?= $tahun ?>">
+                        <input type="hidden" name="bulan_kegiatan" value="<?= $bulan ?>">
+                        <input type="hidden" name="kode_program" value="<?= $kode_program ?>">
+                        <input type="hidden" name="kode_kegiatan" value="<?= $kode_kegiatan ?>">
+                        <input type="hidden" name="kode_kro" value="<?= $kode_kro ?>">
+                        <input type="hidden" name="kode_ro" value="<?= $kode_ro ?>">
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
+                        <!-- <div class="mb-3">
+                        <label class="form-label">No</label>
+                        <input type="number" name="no" id="no" class="form-control form-control-lg">
+                    </div> -->
 
-                    <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Realisasi Kegiatan</h1>
-                    <form action="input_realisasi.php" method="POST">
                         <div class="mb-3">
-                            <label for="kode_program" class="form-label">Kode Program</label>
-                            <input type="text" class="form-control" id="kode_program" name="kode_program" placeholder="Masukkan Kode Program" required>
+                            <label class="form-label">Nama Kegiatan</label>
+                            <input type="text" name="nama_kegiatan" id="nama_kegiatan" class="form-control form-control-lg" required>
                         </div>
+
                         <div class="mb-3">
-                            <label for="kode_kegiatan" class="form-label">Kode kegiatan</label>
-                            <input type="text" class="form-control" id="kode_kegiatan" name="kode_kegiatan" placeholder="Masukkan kode kegiatan" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="kode_kro" class="form-label">Kode KRO</label>
-                            <input type="text" class="form-control" id="kode_kro" name="kode_kro" placeholder="Masukkan kode kro" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="kode_ro" class="form-label">Kode RO</label>
-                            <input type="text" class="form-control" id="kode_ro" name="kode_ro" placeholder="Masukkan kode ro" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nama_kegiatan" class="form-label">Nama Kegiatan</label>
-                            <input type="text" class="form-control" id="nama_kegiatan" name="nama_kegiatan" placeholder="Masukkan Nama kegiatan" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nama_aktivitas" class="form-label">Nama Aktivitas</label>
-                            <select id="nama_aktivitas" name="nama_aktivitas" class="form-control" required>
-                                <option value="" disabled selected>Pilih aktivitas</option>
-                                <?php 
-                                $query = mysqli_query($koneksi, "SELECT * FROM aktivitas");
-                                while ($data = mysqli_fetch_array($query)) {
-                                echo "<option value='{$data['nama_aktivitas']}'>{$data['nama_aktivitas']}</option>";
+                            <label class="form-label">Nama Aktivitas</label>
+                            <select name="nama_aktivitas" id="nama_aktivitas" class="form-control" required>
+                                <option value="">Pilih Aktivitas</option>
+                                <?php
+                                $aktivitas = mysqli_query($koneksi, "SELECT DISTINCT nama_aktivitas FROM aktivitas");
+                                while ($row = mysqli_fetch_assoc($aktivitas)) {
+                                    echo "<option value='{$row['nama_aktivitas']}'>{$row['nama_aktivitas']}</option>";
                                 }
                                 ?>
                             </select>
                         </div>
+
                         <div class="mb-3">
-                            <label for="organik" class="form-label">Jumlah Pegawai Organik</label>
-                            <input type="text" class="form-control" id="organik" name="organik" placeholder="Masukkan Jumlah Pegawai" required>
+                            <label class="form-label">Organik</label>
+                            <input type="number" name="organik" id="organik" class="form-control form-control-lg" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mitra</label>
+                            <input type="number" name="mitra" id="mitra" class="form-control form-control-lg" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Usulan Anggaran</label>
+                            <input type="number" step="0.01" name="usulan_anggaran" id="usulan_anggaran" class="form-control form-control-lg" required>
                         </div>
                         <div class="mb-3">
-                            <label for="mitra" class="form-label">Jumlah Pegawai Mitra</label>
-                            <input type="text" class="form-control" id="mitra" name="mitra" placeholder="Masukkan Jumlah Pegawai" required>
+                            <label for="">Realisasi Anggaran</label>
+                            <input type="number" name="realisasi_anggaran" id="realisasi_anggaran" class="form-control form-control-lg" required>
                         </div>
+
                         <div class="mb-3">
-                            <label for="usulan_anggaran" class="form-label">Usulan Anggaran</label>
-                            <input type="text" class="form-control" id="usulan_anggaran" name="usulan_anggaran" placeholder="Masukkan usulan anggaran" required>
+                            <label class="form-label" for="">Kendala</label>
+                            <input type="text" class="form-control form-control-lg" name="kendala" id="kendala" required>
                         </div>
+
                         <div class="mb-3">
-                            <label for="realisasi_anggaran" class="form-label">Realisasi Anggaran</label>
-                            <input type="text" class="form-control" id="realisasi_anggaran" name="realisasi_anggaran" placeholder="Masukkan realisasi anggaran" required>
+                            <label class="form-label" for="">Solusi</label>
+                            <input type="text" class="form-control form-control-lg" name="solusi" id="solusi">
                         </div>
+
                         <div class="mb-3">
-                            <label for="kendala" class="form-label">Kendala</label>
-                            <input type="text" class="form-control" id="kendala" name="kendala" placeholder="Masukkan kendala" required>
+                            <label for="" class="form-label">Keterangan</label>
+                            <input type="text" class="form-control form-control-lg" name="keterangan" id="keterangan" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="solusi" class="form-label">Solusi</label>
-                            <input type="text" class="form-control" id="solusi" name="solusi" placeholder="Masukkan Solusi" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="input_text_file" class="form-label">Keterangan</label>
-                            <input type="text" class="form-control" id="input_text_file" name="input_text_file" placeholder="Masukkan Keterangan" required>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary mb-3" name="simpan">Simpan</button>
+
+                        <div class="text-center pt-3">
+                            <button type="submit" class="btn btn-success btn-lg px-5">Simpan</button>
                         </div>
                     </form>
-
-                    
-
+                </div>
             </div>
-            <!-- End of Main Content -->
-
-            <?php include("footer.php"); ?>
-
         </div>
-        <!-- End of Content Wrapper -->
-
     </div>
-    <!-- End of Page Wrapper -->
 
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
+    <script src="../js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
