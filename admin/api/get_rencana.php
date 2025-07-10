@@ -10,16 +10,15 @@ $kode_kegiatan = isset($_POST['kode_kegiatan']) ? $_POST['kode_kegiatan'] : '';
 
 if (!empty($kode_program) && !empty($kode_kegiatan)) {
     $query = $koneksi->prepare("
-        SELECT kode_program, kode_kegiatan, kode_kro, kode_ro, nama_kegiatan, nama_aktivitas, organik, mitra, usulan_anggaran
+        SELECT tahun_kegiatan, bulan_kegiatan, kode_program, kode_kegiatan, kode_kro, kode_ro, nama_kegiatan, nama_aktivitas, organik, mitra, usulan_anggaran
         FROM tbl_rencana_anggaran
-        WHERE kode_program = ? AND kode_kegiatan = ? 
+        WHERE kode_program = ? AND kode_kegiatan = ?
         LIMIT ?, ?
     ");
     $query->bind_param("ssii", $kode_program, $kode_kegiatan, $start, $limit);
     $query->execute();
     $result = $query->get_result();
 
-    // Ambil total data buat pagination
     $count_query = $koneksi->prepare("
         SELECT COUNT(*) as total FROM tbl_rencana_anggaran WHERE kode_program = ? AND kode_kegiatan = ?
     ");
@@ -29,14 +28,17 @@ if (!empty($kode_program) && !empty($kode_kegiatan)) {
     $total_data = $count_result->fetch_assoc()['total'];
     $total_pages = ceil($total_data / $limit);
 
-    echo "<table class='table table-bordered'>
+    echo "<div class='table-responsive'>
+            <table class='table table-bordered' id='aktivitasTable' width='100%' cellspacing='0'>
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Kode Program</th>
-                    <th>Kode Kegiatan</th>
-                    <th>Kode KRO</th>
-                    <th>Kode RO</th>
+                    <th>Tahun</th>
+                    <th>Bulan</th>
+                    <th>Program</th>
+                    <th>Kegiatan</th>
+                    <th>KRO</th>
+                    <th>RO</th>
                     <th>Nama Kegiatan</th>
                     <th>Nama Aktivitas</th>
                     <th>Organik</th>
@@ -52,6 +54,8 @@ if (!empty($kode_program) && !empty($kode_kegiatan)) {
         while ($row = $result->fetch_assoc()) {
             echo "<tr>
                     <td>{$no}</td>
+                    <td>{$row['tahun_kegiatan']}</td>
+                    <td>{$row['bulan_kegiatan']}</td>
                     <td>{$row['kode_program']}</td>
                     <td>{$row['kode_kegiatan']}</td>
                     <td>{$row['kode_kro']}</td>
@@ -62,17 +66,19 @@ if (!empty($kode_program) && !empty($kode_kegiatan)) {
                     <td>{$row['mitra']}</td>
                     <td>{$row['usulan_anggaran']}</td>
                     <td>
-                        <button 
+                        <button
     class='btn btn-success btn-sm tambahBtn'
-    data-kode_program='{$row['kode_program']}'
-    data-kode_kegiatan='{$row['kode_kegiatan']}'
-    data-kode_kro='{$row['kode_kro']}'
-    data-kode_ro='{$row['kode_ro']}'
-    data-kode_nama_kegiatan='{$row['nama_kegiatan']}'
-    data-kode_nama_aktivitas='{$row['nama_aktivitas']}'
-    data-kode_organik='{$row['organik']}'
-    data-kode_mitra='{$row['mitra']}'
-    data-kode_usulan_anggaran='{$row['usulan_anggaran']}'
+    data-tahun-kegiatan='{$row['tahun_kegiatan']}'
+    data-bulan-kegiatan='{$row['bulan_kegiatan']}'
+    data-kode-program='{$row['kode_program']}'
+    data-kode-kegiatan='{$row['kode_kegiatan']}'
+    data-kode-kro='{$row['kode_kro']}'
+    data-kode-ro='{$row['kode_ro']}'
+    data-nama-kegiatan='{$row['nama_kegiatan']}'
+    data-nama-aktivitas='{$row['nama_aktivitas']}'
+    data-organik='{$row['organik']}'
+    data-mitra='{$row['mitra']}'
+    data-usulan-anggaran='{$row['usulan_anggaran']}'
 >Tambah</button>
 
 
@@ -83,17 +89,15 @@ if (!empty($kode_program) && !empty($kode_kegiatan)) {
             $no++;
         }
     } else {
-        echo "<tr><td colspan='7' class='text-center'>Data tidak ditemukan</td></tr>";
+        echo "<tr><td colspan='13' class='text-center'>Data tidak ditemukan</td></tr>";
     }
 
-    echo "</tbody></table>";
-
-    // Pagination
+    echo "</tbody></table></div>";
     echo "<nav><ul class='pagination'>";
     for ($i = 1; $i <= $total_pages; $i++) {
         echo "<li class='page-item'><a class='page-link pagination-link' data-page='{$i}' href='#'>{$i}</a></li>";
     }
     echo "</ul></nav>";
 } else {
-    echo "<tr><td colspan='7' class='text-center'>Silakan pilih kode program & kegiatan</td></tr>";
+    echo "<tr><td colspan='13' class='text-center'>Silakan pilih kode program & kegiatan</td></tr>";
 }

@@ -1,89 +1,169 @@
- <!DOCTYPE html>
-<html lang="en">
+<?php
+session_start();
+include "service/database.php";
 
-<head>
+$limit = 10;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$start = ($page - 1) * $limit;
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+$sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'kode_program';
+$sort_order = isset($_GET['sort_order']) && in_array(strtoupper($_GET['sort_order']), ['ASC', 'DESC']) ? strtoupper($_GET['sort_order']) : 'ASC';
 
-    <title>Input Program - BPS</title>
+$allowed_sort_columns = ['kode_program', 'kode_kegiatan', 'uraian_kegiatan'];
+if (!in_array($sort_by, $allowed_sort_columns)) {
+    $sort_by = 'kode_program';
+}
 
-    <!-- Custom fonts for this template -->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+if (isset($_POST["simpan"])) {
+    $kode_program = $_POST["kode_program"];
+    $kode_kegiatan = $_POST["kode_kegiatan"];
+    $uraian_kegiatan = $_POST["uraian_kegiatan"];
 
-    <!-- Custom styles for this template -->
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    $stmt = $koneksi->prepare("INSERT INTO tbl_kegiatan1 (kode_program, kode_kegiatan, uraian_kegiatan) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $kode_program, $kode_kegiatan, $uraian_kegiatan);
 
-    <!-- Custom styles for this page -->
-    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    if ($stmt->execute()) {
+        echo "<script>alert('Data Kegiatan berhasil disimpan!'); window.location.href='input-kegiatan.php';</script>";
+        exit;
+    } else {
+        echo "<script>alert('Data Kegiatan gagal disimpan! Error: " . $stmt->error . "');</script>";
+    }
+    $stmt->close();
+}
 
-</head>
+ob_start();
+?>
 
- <?php include("header.php"); ?>
- <div class="container-fluid">
- <div class="form-container">
-                <h2>Tambah Kegiatan</h2>
-                <form action="input_kegiatan.php" method="POST">
-                    <div class="mb-3 m-0">
-                        <label for="kode_program" class="form-label">Kode Program</label>
-                        <input type="text" class="form-control" id="kode_program" name="kode_program" placeholder="Masukkan Kode Program" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="kode_kegiatan" class="form-label">Kode Kegiatan</label>
-                        <input type="text" class="form-control" id="kode_kegiatan" name="kode_kegiatan" placeholder="Masukkan Kode Kegiatan" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="uraian_kegiatan" class="form-label">Uraian Kegiatan</label>
-                        <input type="text" class="form-control" id="uraian_kegiatan" name="uraian_kegiatan" placeholder="Masukkan Uraian Kegiatan" required>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary" name="simpan">Simpan</button>
-                    </div>
-                </form>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Manajemen Kegiatan</h1>
+</div>
+
+<p class="mb-4 text-gray-700">Silakan kelola data Kegiatan BPS di halaman ini. Anda dapat menambah, melihat, mengedit, dan menghapus data Kegiatan.</p>
+
+<div class="card shadow mb-5">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-plus-circle"></i> Tambah Data Kegiatan Baru</h6>
+    </div>
+    <div class="card-body">
+        <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST">
+            <div class="form-group row mb-3">
+                <label for="kode_program" class="col-sm-3 col-form-label">Kode Program</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="kode_program" name="kode_program" placeholder="Contoh: 1234" required>
+                </div>
             </div>
-            <div class="table-container">
-                <div class="table-container">
-    <h3 class="m-3">List Kegiatan</h3>
-    <table class="table table-bordered" id="aktivitasTable">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Kode Program</th>
-                <th>Kode Kegiatan</th>
-                <th>Uraian Kegiatan</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-         <tbody>
-            <?php
-            include "service/database.php";
-            $no = 1;
-            $query = "SELECT kode_program, kode_kegiatan, uraian_kegiatan FROM tbl_kegiatan1 ORDER BY kode_program ASC";
-            $result = $koneksi->query($query);
+            <div class="form-group row mb-3">
+                <label for="kode_kegiatan" class="col-sm-3 col-form-label">Kode Kegiatan</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="kode_kegiatan" name="kode_kegiatan" placeholder="Contoh: 5678" required>
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <label for="uraian_kegiatan" class="col-sm-3 col-form-label">Uraian Kegiatan</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="uraian_kegiatan" name="uraian_kegiatan" placeholder="Contoh: Pengumpulan Data" required>
+                </div>
+            </div>
+            <div class="form-group row mt-4">
+                <div class="col-sm-9 offset-sm-3">
+                    <button type="submit" class="btn btn-primary btn-icon-split" name="simpan">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-save"></i>
+                        </span>
+                        <span class="text">Simpan Data</span>
+                    </button>
+                    <button type="reset" class="btn btn-secondary btn-icon-split ml-2">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-sync-alt"></i>
+                        </span>
+                        <span class="text">Reset Form</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>".$no++."</td>";
-                    echo "<td>".$row['kode_program']."</td>";
-                    echo "<td>".$row['kode_kegiatan']."</td>";
-                    echo "<td>".$row['uraian_kegiatan']."</td>";
-                    echo "<td>
-                            <a href='edit_kegiatan.php?kode_kegiatan=".$row['kode_kegiatan']."' class='btn btn-warning btn-sm'>Edit</a>
-                            <a href='hapus_kegiatan.php?kode_kegiatan=".$row['kode_kegiatan']."' class='btn btn-danger btn-sm' onclick=\"return confirm('Yakin ingin menghapus data ini?');\">Hapus</a>
-                          </td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='5' class='text-center'>Belum ada data</td></tr>";
-            }
-            ?>
-        </tbody>
-        </table>
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-list"></i> Data Kegiatan Tersedia</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th class="text-center">No</th>
+                        <?php
+                        $columns = [
+                            'kode_program' => 'Kode Program',
+                            'kode_kegiatan' => 'Kode Kegiatan',
+                            'uraian_kegiatan' => 'Uraian Kegiatan'
+                        ];
+                        foreach ($columns as $col_name => $col_label) {
+                            $next_order = ($sort_by == $col_name && $sort_order == 'ASC') ? 'DESC' : 'ASC';
+                            $arrow = '';
+                            if ($sort_by == $col_name) {
+                                $arrow = ($sort_order == 'ASC') ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+                            }
+                            echo "<th class='text-center'><a href='?page={$page}&sort_by={$col_name}&sort_order={$next_order}' class='text-white text-decoration-none'>{$col_label}{$arrow}</a></th>";
+                        }
+                        ?>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $total_query = "SELECT COUNT(*) AS total FROM tbl_kegiatan1";
+                    $total_result = $koneksi->query($total_query);
+                    $total_rows = $total_result->fetch_assoc()['total'];
+                    $total_pages = ceil($total_rows / $limit);
+
+                    $query = "SELECT kode_program, kode_kegiatan, uraian_kegiatan FROM tbl_kegiatan1 ORDER BY {$sort_by} {$sort_order} LIMIT {$start}, {$limit}";
+                    $result = $koneksi->query($query);
+
+                    if ($result && $result->num_rows > 0) {
+                        $no = $start + 1;
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<tr>";
+                            echo "<td class='text-center'>" . $no++ . "</td>";
+                            echo "<td>" . htmlspecialchars($row['kode_program']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['kode_kegiatan']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['uraian_kegiatan']) . "</td>";
+                            echo "<td class='text-center'>
+                                <a href='edit_kegiatan.php?kode_kegiatan=" . urlencode($row['kode_kegiatan']) . "' class='btn btn-warning btn-sm mr-1' title='Edit Data'><i class='fas fa-edit'></i> Edit</a>
+                                <a href='hapus_kegiatan.php?kode_kegiatan=" . urlencode($row['kode_kegiatan']) . "' class='btn btn-danger btn-sm' onclick=\"return confirm('Apakah Anda yakin ingin menghapus data ini?');\" title='Hapus Data'><i class='fas fa-trash'></i> Hapus</a>
+                            </td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='5' class='text-center'>Belum ada data kegiatan yang tersedia.</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page - 1 ?>&sort_by=<?= $sort_by ?>&sort_order=<?= $sort_order ?>">Previous</a>
+                </li>
+                <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
+                    <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?>&sort_by=<?= $sort_by ?>&sort_order=<?= $sort_order ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page + 1 ?>&sort_by=<?= $sort_by ?>&sort_order=<?= $sort_order ?>">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<?php
+$content = ob_get_clean();
+$title = "Input Kegiatan";
+include "layout.php";
+?>

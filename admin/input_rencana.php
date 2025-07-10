@@ -50,10 +50,10 @@ include "service/database.php";
                             <label for="nama_aktivitas" class="form-label">Nama Aktivitas</label>
                             <select id="nama_aktivitas" name="nama_aktivitas" class="form-control" required>
                                 <option value="" disabled selected>Pilih aktivitas</option>
-                                <?php 
+                                <?php
                                 $query = mysqli_query($koneksi, "SELECT * FROM aktivitas");
                                 while ($data = mysqli_fetch_array($query)) {
-                                echo "<option value='{$data['nama_aktivitas']}'>{$data['nama_aktivitas']}</option>";
+                                    echo "<option value='{$data['nama_aktivitas']}'>{$data['nama_aktivitas']}</option>";
                                 }
                                 ?>
                             </select>
@@ -75,23 +75,23 @@ include "service/database.php";
                         </div>
                     </form>
 
-                    
+
+
+                </div>
+                <!-- End of Main Content -->
+
+                <?php include("footer.php"); ?>
 
             </div>
-            <!-- End of Main Content -->
-
-            <?php include("footer.php"); ?>
+            <!-- End of Content Wrapper -->
 
         </div>
-        <!-- End of Content Wrapper -->
+        <!-- End of Page Wrapper -->
 
-    </div>
-    <!-- End of Page Wrapper -->
-
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
 
 </body>
 

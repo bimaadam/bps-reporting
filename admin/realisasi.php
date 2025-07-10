@@ -1,16 +1,38 @@
 <?php
+
 include "service/database.php";
 
-if (isset($_POST['simpan'])) {
-    $kode_program = $_POST['kode_program'];
-    $kode_kegiatan = $_POST['kode_kegiatan'];
-    $kode_kro = $_POST['kode_kro'];
-    $kode_ro = $_POST['kode_ro'];
-    $nama_kegiatan = $_POST['nama_kegiatan'];
-    $nama_aktivitas = $_POST['nama_aktivitas'];
-    $organik = $_POST['organik'];
-    $mitra = $_POST['mitra'];
-    $usulan_anggaran = $_POST['usulan_anggaran'];
+$message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kode_program_ajax_submit'])) {
+
+    $tahun_kegiatan_raw  = $_POST['tahun_kegiatan'] ?? '';
+    $bulan_kegiatan_raw  = $_POST['bulan_kegiatan'] ?? '';
+    $kode_program_raw    = $_POST['kode_program'] ?? '';
+    $kode_kegiatan_raw   = $_POST['kode_kegiatan'] ?? '';
+    $kode_kro_raw        = $_POST['kode_kro'] ?? '';
+    $kode_ro_raw         = $_POST['kode_ro'] ?? '';
+    $nama_kegiatan_raw   = $_POST['nama_kegiatan'] ?? '';
+    $nama_aktivitas_raw  = $_POST['nama_aktivitas'] ?? '';
+    $organik_raw         = $_POST['organik'] ?? '';
+    $mitra_raw           = $_POST['mitra'] ?? '';
+    $usulan_anggaran_raw = $_POST['usulan_anggaran'] ?? '';
+
+    $bulan_realisasi_raw = $bulan_kegiatan_raw;
+
+    $tahun_kegiatan  = mysqli_real_escape_string($koneksi, $tahun_kegiatan_raw);
+    $bulan_kegiatan  = mysqli_real_escape_string($koneksi, $bulan_kegiatan_raw);
+    $bulan_realisasi = mysqli_real_escape_string($koneksi, $bulan_realisasi_raw);
+    $kode_program    = mysqli_real_escape_string($koneksi, $kode_program_raw);
+    $kode_kegiatan   = mysqli_real_escape_string($koneksi, $kode_kegiatan_raw);
+    $kode_kro        = mysqli_real_escape_string($koneksi, $kode_kro_raw);
+    $kode_ro         = mysqli_real_escape_string($koneksi, $kode_ro_raw);
+    $nama_kegiatan   = mysqli_real_escape_string($koneksi, $nama_kegiatan_raw);
+    $nama_aktivitas  = mysqli_real_escape_string($koneksi, $nama_aktivitas_raw);
+    $organik         = mysqli_real_escape_string($koneksi, $organik_raw);
+    $mitra           = mysqli_real_escape_string($koneksi, $mitra_raw);
+    $usulan_anggaran = mysqli_real_escape_string($koneksi, $usulan_anggaran_raw);
+
 
     $query = "INSERT INTO tbl_realisasi_anggaran (
         tahun_kegiatan, bulan_kegiatan, bulan_realisasi,
@@ -25,88 +47,137 @@ if (isset($_POST['simpan'])) {
     )";
 
     if (mysqli_query($koneksi, $query)) {
-        echo "<script>alert('✅ Data berhasil disimpan!'); window.location.href='input_realisasi.php';</script>";
+        echo "✅ Data berhasil disimpan!";
     } else {
-        echo "<script>alert('❌ Gagal simpan data: " . mysqli_error($koneksi) . "');</script>";
+        echo "❌ Gagal simpan data: " . mysqli_error($koneksi);
     }
+    exit();
 }
+
+$tahun_kegiatan_get = $_GET['tahun_kegiatan'] ?? date('Y');
+$bulan_kegiatan_get = $_GET['bulan_kegiatan'] ?? date('m');
+$kode_kegiatan_get  = $_GET['kode_kegiatan'] ?? '';
+$kode_kro_get       = $_GET['kode_kro'] ?? '';
+$kode_ro_get        = $_GET['kode_ro'] ?? '';
+$nama_kegiatan_get  = $_GET['nama_kegiatan'] ?? '';
+$nama_aktivitas_get = $_GET['nama_aktivitas'] ?? '';
+$organik_get        = $_GET['organik'] ?? '';
+$mitra_get          = $_GET['mitra'] ?? '';
+$usulan_anggaran_get = $_GET['usulan_anggaran'] ?? '';
+
+ob_start();
 ?>
 
-<?php include("header.php"); ?>
 <div class="container-fluid">
 
-    <!-- Page Heading -->
-    <h1 class="h3 mb-4 text-gray-800">Input Realisasi</h1>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Input Realisasi Kegiatan</h1>
+    </div>
 
-    <!-- Form Aktivitas -->
-    <div class="card shadow mb-4">
+    <p class="mb-4 text-gray-700">Pilih Program dan Kegiatan untuk melihat Rincian Output (RO) terkait dan mulai menyusun realisasi kegiatan.</p>
+
+    <?php if ($message) : ?>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($message) ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <div class="card shadow mb-5">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Form Realisai</h6>
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-filter"></i> Pilih Program dan Kegiatan</h6>
         </div>
         <div class="card-body">
             <form id="realisasiForm" method="POST">
-                <div class="form-group">
-                    <label for="kode_program">Program</label>
-                    <select id="kode_program" name="kode_program" class="form-control" required>
-                        <option value="" disabled selected>Pilih Program</option>
-                        <?php
-                        $query = mysqli_query($koneksi, "SELECT * FROM tbl_program1");
-                        while ($data = mysqli_fetch_array($query)) {
-                            echo "<option value='{$data['kode_program']}'>{$data['kode_program']}</option>";
-                        }
-                        ?>
-                    </select>
+                <div class="form-group row mb-3">
+                    <label for="kode_program" class="col-sm-3 col-form-label">Program</label>
+                    <div class="col-sm-9">
+                        <select id="kode_program" name="kode_program" class="form-control" required>
+                            <option value="" disabled selected>Pilih Program</option>
+                            <?php
+                            $query_program = mysqli_query($koneksi, "SELECT kode_program, uraian_program FROM tbl_program1 ORDER BY kode_program ASC");
+                            if ($query_program && mysqli_num_rows($query_program) > 0) {
+                                while ($data_program = mysqli_fetch_array($query_program)) {
+                                    echo "<option value='" . htmlspecialchars($data_program['kode_program']) . "'>" . htmlspecialchars($data_program['kode_program']) . " - " . htmlspecialchars($data_program['uraian_program']) . "</option>";
+                                }
+                            } else {
+                                echo "<option value=''>Tidak ada data program</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="kode_kegiatan">Kegiatan</label>
-                    <select id="kode_kegiatan" name="kode_kegiatan" class="form-control" required>
-                        <option value="" disabled selected>Pilih Kegiatan</option>
-                    </select>
+                <div class="form-group row mb-3">
+                    <label for="kode_kegiatan" class="col-sm-3 col-form-label">Kegiatan</label>
+                    <div class="col-sm-9">
+                        <select id="kode_kegiatan" name="kode_kegiatan" class="form-control" required>
+                            <option value="" disabled selected>Pilih Kegiatan</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- input hide search params -->
-                <input hidden type="text" name="tahun_kegiatan" value="<?= $_GET['tahun_kegiatan'] ?? date('Y') ?>">
-                <input hidden type="text" name="bulan_kegiatan" value="<?= $_GET['bulan_kegiatan'] ?? date('m') ?>">
-                <input hidden type="text" name="kode_kegiatan" value="<?= $_GET['kode_kegiatan'] ?? '' ?>">
-                <input hidden type="text" name="kode_kro" value="<?= $_GET['kode_kro'] ?? '' ?>">
-                <input hidden type="text" name="kode_ro" value="<?= $_GET['kode_ro'] ?? '' ?>">
-                <input hidden type="text" name="nama_kegiatan" value="<?= $_GET['nama_kegiatan'] ?? '' ?>">
-                <input hidden type="text" name="nama_aktivitas" value="<?= $_GET['nama_aktivitas'] ?? '' ?>">
-                <input hidden type="text" name="organik" value="<?= $_GET['organik'] ?? '' ?>">
-                <input hidden type="text" name="mitra" value="<?= $_GET['mitra'] ?? '' ?>">
-                <input hidden type="text" name="usulan_anggaran" value="<?= $_GET['usulan_anggaran'] ?? '' ?>">
+                <input type="hidden" name="tahun_kegiatan" value="<?= htmlspecialchars($tahun_kegiatan_get) ?>">
+                <input type="hidden" name="bulan_kegiatan" value="<?= htmlspecialchars($bulan_kegiatan_get) ?>">
+                <input type="hidden" name="kode_kegiatan" value="<?= htmlspecialchars($kode_kegiatan_get) ?>">
+                <input type="hidden" name="kode_kro" value="<?= htmlspecialchars($kode_kro_get) ?>">
+                <input type="hidden" name="kode_ro" value="<?= htmlspecialchars($kode_ro_get) ?>">
+                <input type="hidden" name="nama_kegiatan" value="<?= htmlspecialchars($nama_kegiatan_get) ?>">
+                <input type="hidden" name="nama_aktivitas" value="<?= htmlspecialchars($nama_aktivitas_get) ?>">
+                <input type="hidden" name="organik" value="<?= htmlspecialchars($organik_get) ?>">
+                <input type="hidden" name="mitra" value="<?= htmlspecialchars($mitra_get) ?>">
+                <input type="hidden" name="usulan_anggaran" value="<?= htmlspecialchars($usulan_anggaran_get) ?>">
 
-
-                <button type="button" id="okeBtn" class="btn btn-primary">OK</button>
-                <button type="reset" class="btn btn-secondary">Cancel</button>
+                <div class="d-flex justify-content-end">
+                    <button type="button" id="okeBtn" class="btn btn-primary mr-2"><i class="fas fa-check"></i> OK</button>
+                    <button type="reset" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Tabel Kegiatan -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Realisasi Terpilih</h6>
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-clipboard-list"></i> Data Rencana Kegiatan</h6>
         </div>
         <div class="card-body">
-            <table class="table table-bordered" id="aktivitasTable">
-                <tbody>
-                    <tr id="noDataRow">
-                        <td colspan="4" class="text-center">Belum ada data</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="aktivitasTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Tahun</th>
+                            <th>Bulan</th>
+                            <th>Program</th>
+                            <th>Kegiatan</th>
+                            <th>KRO</th>
+                            <th>RO</th>
+                            <th>Nama Kegiatan</th>
+                            <th>Nama Aktivitas</th>
+                            <th>Organik</th>
+                            <th>Mitra</th>
+                            <th>Usulan Anggaran</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="noDataRow">
+                            <td colspan="12" class="text-center">Silakan pilih Program dan Kegiatan, lalu klik OK.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
+<?php
+$content = ob_get_clean();
+$title = "Input Realisasi";
+include "layout.php";
+?>
 
-<!-- jQuery harus sebelum Bootstrap -->
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.bundle.min.js"></script>
-
-<!-- AJAX Logic -->
 <script>
     $(document).ready(function() {
 
@@ -115,7 +186,7 @@ if (isset($_POST['simpan'])) {
             const kode_kegiatan = $('#kode_kegiatan').val();
 
             if (!kode_program || !kode_kegiatan) {
-                alert("Silakan pilih program dan kegiatan!");
+                $('#aktivitasTable tbody').html('<tr><td colspan="12" class="text-center">Silakan pilih Program dan Kegiatan, lalu klik OK.</td></tr>');
                 return;
             }
 
@@ -129,6 +200,12 @@ if (isset($_POST['simpan'])) {
                 },
                 success: function(response) {
                     $('#aktivitasTable tbody').html(response);
+                    if ($('#aktivitasTable tbody').children().length === 0) {
+                        $('#aktivitasTable tbody').html('<tr><td colspan="12" class="text-center">Tidak ada data rencana untuk pilihan ini.</td></tr>');
+                    }
+                },
+                error: function() {
+                    $('#aktivitasTable tbody').html('<tr><td colspan="12" class="text-center text-danger">Gagal memuat data.</td></tr>');
                 }
             });
         }
@@ -139,10 +216,17 @@ if (isset($_POST['simpan'])) {
                 url: 'api/get_kegiatan.php',
                 method: 'POST',
                 data: {
-                    kode_program
+                    kode_program: kode_program
                 },
                 success: function(response) {
                     $('#kode_kegiatan').html(response);
+                    $('#kode_kegiatan').val('').trigger('change');
+
+                    $('#aktivitasTable tbody').html('<tr><td colspan="12" class="text-center">Silakan pilih Kegiatan, lalu klik OK.</td></tr>');
+                },
+                error: function(xhr, status, error) {
+                    $('#kode_kegiatan').html('<option value="">Error memuat kegiatan</option>');
+                    console.error("Error fetching kegiatan:", status, error, xhr.responseText);
                 }
             });
         });
@@ -158,42 +242,31 @@ if (isset($_POST['simpan'])) {
         });
 
         $(document).on('click', '.tambahBtn', function() {
+
             const data = {
-                tahun_kegiatan: $(this).data('tahun_kegiatan'),
-                bulan_kegiatan: $(this).data('bulan_kegiatan'),
-                kode_program: $(this).data('kode_program'),
-                kode_kegiatan: $(this).data('kode_kegiatan'),
-                kode_kro: $(this).data('kode_kro'),
-                kode_ro: $(this).data('kode_ro'),
-                nama_kegiatan: $(this).data('nama_kegiatan'),
-                nama_aktivitas: $(this).data('nama_aktivitas'),
+                tahun_kegiatan: $(this).data('tahun-kegiatan'),
+                bulan_kegiatan: $(this).data('bulan-kegiatan'),
+                kode_program: $(this).data('kode-program'),
+                kode_kegiatan: $(this).data('kode-kegiatan'),
+                kode_kro: $(this).data('kode-kro'),
+                kode_ro: $(this).data('kode-ro'),
+                nama_kegiatan: $(this).data('nama-kegiatan'),
+                nama_aktivitas: $(this).data('nama-aktivitas'),
                 organik: $(this).data('organik'),
                 mitra: $(this).data('mitra'),
-                usulan_anggaran: $(this).data('usulan_anggaran')
+                usulan_anggaran: $(this).data('usulan-anggaran')
             };
 
-            const params = new URLSearchParams(data).toString();
-            window.location.href = `input_realisasi.php?${params}`;
 
-
-            $.ajax({
-                url: 'input_realisasi.php',
-                type: 'POST',
-                data: data,
-                success: function() {
-                    alert('✅ Data berhasil dimasukkan');
-                    loadTable(); // reload isi tabel realisasi
-                },
-                error: function() {
-                    alert('❌ Gagal menambahkan data');
-                }
-            });
+            const queryParams = new URLSearchParams(data).toString();
+            window.location.href = `input_realisasi.php?${queryParams}`;
         });
 
 
         $(document).on('click', '.editBtn', function() {
             const id = $(this).data('id');
             alert('Edit data dengan ID: ' + id);
+
         });
 
         $(document).on('click', '.deleteBtn', function() {
@@ -203,11 +276,14 @@ if (isset($_POST['simpan'])) {
                     url: 'delete_ro.php',
                     method: 'POST',
                     data: {
-                        id
+                        id: id
                     },
                     success: function(response) {
                         alert(response);
                         loadTable();
+                    },
+                    error: function() {
+                        alert('❌ Gagal menghapus data.');
                     }
                 });
             }

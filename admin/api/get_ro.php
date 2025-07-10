@@ -1,7 +1,7 @@
 <?php
 include '../service/database.php';
 
-$limit = 10; 
+$limit = 10;
 $page = isset($_POST['page']) ? $_POST['page'] : 1;
 $start = ($page - 1) * $limit;
 
@@ -19,7 +19,6 @@ if (!empty($kode_program) && !empty($kode_kegiatan)) {
     $query->execute();
     $result = $query->get_result();
 
-    // Ambil total data buat pagination
     $count_query = $koneksi->prepare("
         SELECT COUNT(*) as total FROM tbl_ro1 WHERE kode_program = ? AND kode_kegiatan = ?
     ");
@@ -75,7 +74,6 @@ if (!empty($kode_program) && !empty($kode_kegiatan)) {
 
     echo "</tbody></table>";
 
-    // Pagination
     echo "<nav><ul class='pagination'>";
     for ($i = 1; $i <= $total_pages; $i++) {
         echo "<li class='page-item'><a class='page-link pagination-link' data-page='{$i}' href='#'>{$i}</a></li>";
