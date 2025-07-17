@@ -10,7 +10,7 @@ $kode_kegiatan = isset($_POST['kode_kegiatan']) ? $_POST['kode_kegiatan'] : '';
 
 if (!empty($kode_program) && !empty($kode_kegiatan)) {
     $query = $koneksi->prepare("
-        SELECT tahun_kegiatan, bulan_kegiatan, kode_program, kode_kegiatan, kode_kro, kode_ro, nama_kegiatan, nama_aktivitas, organik, mitra, usulan_anggaran
+        SELECT id, tahun_kegiatan, bulan_kegiatan, kode_program, kode_kegiatan, kode_kro, kode_ro, nama_kegiatan, nama_aktivitas, organik, mitra, usulan_anggaran
         FROM tbl_rencana_anggaran
         WHERE kode_program = ? AND kode_kegiatan = ?
         LIMIT ?, ?
@@ -83,7 +83,7 @@ if (!empty($kode_program) && !empty($kode_kegiatan)) {
 
 
                         <button class='btn btn-primary btn-sm editBtn' data-id='{$row['kode_ro']}'>Edit</button>
-                        <button class='btn btn-danger btn-sm deleteBtn' data-id='{$row['kode_ro']}'>Hapus</button>
+                        <button class='btn btn-danger btn-sm deleteBtn' data-id='{$row['id']}'>Hapus</button>
                     </td>
                   </tr>";
             $no++;

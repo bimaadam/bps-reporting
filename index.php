@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>...</title>
+    <title>BPS TASIK</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="">
     <style>
@@ -36,7 +36,7 @@
             <p class="lead">Penyedia Data Statistik Terpercaya untuk Indonesia.</p>
             <hr class="my-4">
             <p>Temukan data dan informasi statistik terbaru yang Anda butuhkan.</p>
-            <a class="btn btn-primary btn-lg" href="admin/" role="button">Login</a>
+            <a class="btn btn-primary btn-lg" href="admin/" role="button">Masuk ke Login Dashboard</a>
         </div>
 
     </main>

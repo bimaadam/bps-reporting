@@ -1,5 +1,92 @@
-<?php require 'api/auth.php'; // Pastikan path ini benar 
+<?php
+require 'api/auth.php';
+require 'service/database.php';
+
 ob_start();
+
+// Error reporting untuk development
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+
+// Inisialisasi filter
+$tahun_filter = isset($_GET['tahun']) ? (int)$_GET['tahun'] : null;
+$bulan_filter = isset($_GET['bulan']) ? (int)$_GET['bulan'] : null;
+
+// Query untuk data realisasi dengan prepared statement
+$query = "SELECT 
+            tahun_kegiatan,
+            bulan_kegiatan,
+            bulan_realisasi,
+            kode_program,
+            kode_kegiatan,
+            kode_kro,
+            kode_ro,
+            nama_kegiatan,
+            nama_aktivitas,
+            organik,
+            mitra,
+            usulan_anggaran,
+            realisasi_anggaran,
+            kendala,
+            solusi,
+            keterangan
+          FROM tbl_realisasi_anggaran WHERE 1=1";
+
+$conditions = [];
+$types = '';
+$params = [];
+
+if ($tahun_filter) {
+  $conditions[] = "tahun_kegiatan = ?";
+  $types .= 'i';
+  $params[] = $tahun_filter;
+}
+
+if ($bulan_filter) {
+  $conditions[] = "bulan_kegiatan = ?";
+  $types .= 'i';
+  $params[] = $bulan_filter;
+}
+
+if (!empty($conditions)) {
+  $query .= " AND " . implode(" AND ", $conditions);
+}
+
+$query .= " ORDER BY tahun_kegiatan DESC, bulan_kegiatan DESC LIMIT 10";
+
+$stmt = mysqli_prepare($koneksi, $query);
+
+if ($stmt) {
+  if (!empty($params)) {
+    mysqli_stmt_bind_param($stmt, $types, ...$params);
+  }
+  mysqli_stmt_execute($stmt);
+  $result = mysqli_stmt_get_result($stmt);
+} else {
+  die("Error in prepared statement: " . mysqli_error($conn));
+}
+
+// Hitung total anggaran dan realisasi
+$query_totals = "SELECT 
+    SUM(usulan_anggaran) as total_anggaran,
+    SUM(realisasi_anggaran) as total_realisasi,
+    SUM(CASE WHEN organik = 1 THEN realisasi_anggaran ELSE 0 END) as organik,
+    SUM(CASE WHEN mitra = 1 THEN realisasi_anggaran ELSE 0 END) as mitra,
+    SUM(CASE WHEN organik = 0 AND mitra = 0 THEN realisasi_anggaran ELSE 0 END) as lain
+    FROM tbl_realisasi_anggaran";
+
+$result_totals = mysqli_query($koneksi, $query_totals);
+$row_totals = mysqli_fetch_assoc($result_totals);
+
+$total_anggaran = $row_totals['total_anggaran'] ?? 0;
+$total_realisasi = $row_totals['total_realisasi'] ?? 0;
+$persentase = ($total_anggaran > 0) ? ($total_realisasi / $total_anggaran) * 100 : 0;
+$sisa_anggaran = $total_anggaran - $total_realisasi;
+
+// Data untuk chart
+$organik = $row_totals['organik'] ?? 0;
+$mitra = $row_totals['mitra'] ?? 0;
+$lain = $row_totals['lain'] ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -23,245 +110,165 @@ ob_start();
 </head>
 
 <body id="page-top">
-  <div id="wrapper">
+  <!-- Bagian wrapper dan header tetap sama -->
 
-
-
-    <div id="content-wrapper" class="d-flex flex-column">
-
-      <div id="content">
-
-        <div class="container-fluid">
-
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Dashboard Anggaran</h1>
-            <a href="admin/input_realisasi.php"
-              class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-plus fa-sm text-white-50"></i> Input Realisasi Baru</a>
-          </div>
-
-          <div class="row">
-
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                        Total Usulan Anggaran</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">Rp 120.000.000</div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-money-bill fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                        Total Realisasi Anggaran</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">Rp 75.000.000</div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Persentase Realisasi
-                      </div>
-                      <div class="row no-gutters align-items-center">
-                        <div class="col-auto">
-                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">62.5%</div>
-                        </div>
-                        <div class="col">
-                          <div class="progress progress-sm mr-2">
-                            <div class="progress-bar bg-info" role="progressbar"
-                              style="width: 62.5%" aria-valuenow="62.5" aria-valuemin="0"
-                              aria-valuemax="100"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                        Sisa Anggaran</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">Rp 45.000.000</div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-wallet fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
+  <div class="container-fluid">
+    <!-- Bagian cards dashboard -->
+    <div class="row">
+      <!-- Card Total Usulan Anggaran -->
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                  Total Usulan Anggaran</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">Rp <?= number_format($total_anggaran, 0, ',', '.') ?></div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <!-- Card lainnya tetap sama -->
+    </div>
 
-          <div class="row">
-            <div class="col-xl-8 col-lg-7">
-              <div class="card shadow mb-4">
-                <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Realisasi Anggaran per Bulan</h6>
-                  <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                      aria-labelledby="dropdownMenuLink">
-                      <div class="dropdown-header">Filter Tahun:</div>
-                      <a class="dropdown-item" href="#">2023</a>
-                      <a class="dropdown-item" href="#">2024</a>
-                      <a class="dropdown-item" href="#">2025</a>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="chart-area">
-                    <canvas id="myAreaChart"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <!-- Grafik -->
+    <!-- <div class="row">
+      <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Realisasi Anggaran per Bulan</h6>
+          </div>
+          <div class="card-body">
+            <canvas id="myAreaChart"></canvas>
+          </div>
+        </div>
+      </div> -->
 
-            <div class="col-xl-4 col-lg-5">
-              <div class="card shadow mb-4">
-                <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Realisasi per Kategori</h6>
-                  <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                      aria-labelledby="dropdownMenuLink">
-                      <div class="dropdown-header">Filter:</div>
-                      <a class="dropdown-item" href="#">Semua</a>
-                      <a class="dropdown-item" href="#">Organik</a>
-                      <a class="dropdown-item" href="#">Mitra</a>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="chart-pie pt-4 pb-2">
-                    <canvas id="myPieChart"></canvas>
-                  </div>
-                  <div class="mt-4 text-center small">
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-primary"></i> Organik
-                    </span>
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-success"></i> Mitra
-                    </span>
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-info"></i> Lain-lain
-                    </span>
-                  </div>
-                </div>
-              </div>
+    <!-- <div class="col-xl-4 col-lg-5">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Realisasi per Kategori</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="myPieChart"></canvas>
+          <div class="mt-4 text-center small">
+            <span class="mr-2">
+              <i class="fas fa-circle text-primary"></i> Organik (Rp <?= number_format($organik, 0, ',', '.') ?>)
+            </span>
+            <span class="mr-2">
+              <i class="fas fa-circle text-success"></i> Mitra (Rp <?= number_format($mitra, 0, ',', '.') ?>)
+            </span>
+            <span class="mr-2">
+              <i class="fas fa-circle text-info"></i> Lain-lain (Rp <?= number_format($lain, 0, ',', '.') ?>)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+    <!-- Tabel Realisasi -->
+    <div class="row">
+      <div class="col-lg-12 mb-4">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">10 Realisasi Terbaru</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <form method="GET" class="form-inline mb-3">
+                <select name="tahun" class="form-control mr-2">
+                  <option value="">-- Tahun --</option>
+                  <?php for ($y = 2020; $y <= date('Y'); $y++): ?>
+                    <option value="<?= $y ?>" <?= $tahun_filter == $y ? 'selected' : '' ?>><?= $y ?></option>
+                  <?php endfor; ?>
+                </select>
+
+                <select name="bulan" class="form-control mr-2">
+                  <option value="">-- Bulan --</option>
+                  <?php for ($b = 1; $b <= 12; $b++): ?>
+                    <option value="<?= $b ?>" <?= $bulan_filter == $b ? 'selected' : '' ?>>
+                      <?= date("F", mktime(0, 0, 0, $b, 10)) ?>
+                    </option>
+                  <?php endfor; ?>
+                </select>
+
+                <button type="submit" class="btn btn-primary">Filter</button>
+              </form>
+
+              <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th>Tahun</th>
+                    <th>Bulan</th>
+                    <th>Program</th>
+                    <th>Kegiatan</th>
+                    <th>KRO</th>
+                    <th>RO</th>
+                    <th>Nama Kegiatan</th>
+                    <th>Organik</th>
+                    <th>Mitra</th>
+                    <th>Usulan</th>
+                    <th>Realisasi</th>
+                    <th>Kendala</th>
+                    <th>Solusi</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php if (mysqli_num_rows($result) > 0): ?>
+                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                      <tr>
+                        <td><?= htmlspecialchars($row['tahun_kegiatan']) ?></td>
+                        <?php
+                        $bulan = (int)$row['bulan_kegiatan'];
+                        if ($bulan >= 1 && $bulan <= 12) {
+                          echo date("F", mktime(0, 0, 0, $bulan, 10));
+                        } else {
+                          echo 'Invalid Month';
+                        }
+                        ?>
+                        <td><?= htmlspecialchars($row['kode_program']) ?></td>
+                        <td><?= htmlspecialchars($row['kode_kegiatan']) ?></td>
+                        <td><?= htmlspecialchars($row['kode_kro']) ?></td>
+                        <td><?= htmlspecialchars($row['kode_ro']) ?></td>
+                        <td><?= htmlspecialchars($row['nama_kegiatan']) ?></td>
+                        <td><?= $row['organik'] ? 'Ya' : 'Tidak' ?></td>
+                        <td><?= $row['mitra'] ? 'Ya' : 'Tidak' ?></td>
+                        <td>Rp <?= number_format($row['usulan_anggaran'], 0, ',', '.') ?></td>
+                        <td>Rp <?= number_format($row['realisasi_anggaran'], 0, ',', '.') ?></td>
+                        <td><?= htmlspecialchars($row['kendala']) ?></td>
+                        <td><?= htmlspecialchars($row['solusi']) ?></td>
+                        <td><?= htmlspecialchars($row['keterangan']) ?></td>
+                      </tr>
+                    <?php endwhile; ?>
+                  <?php else: ?>
+                    <tr>
+                      <td colspan="14" class="text-center">Tidak ada data realisasi</td>
+                    </tr>
+                  <?php endif; ?>
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <div class="row">
-            <div class="col-lg-12 mb-4">
-              <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">10 Realisasi Terbaru</h6>
-                </div>
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%"
-                      cellspacing="0">
-                      <thead>
-                        <tr>
-                          <th>Tahun</th>
-                          <th>Bulan</th>
-                          <th>Program</th>
-                          <th>Kegiatan</th>
-                          <th>Realisasi</th>
-                          <th>Kendala</th>
-                          <th>Keterangan</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>2023</td>
-                          <td>Januari</td>
-                          <td>054.01.WA</td>
-                          <td>2886</td>
-                          <td>Rp 10.000.000</td>
-                          <td>Cuaca Buruk</td>
-                          <td>Selesai</td>
-                        </tr>
-                        <tr>
-                          <td>2023</td>
-                          <td>Februari</td>
-                          <td>054.01.GG</td>
-                          <td>2910</td>
-                          <td>Rp 5.000.000</td>
-                          <td>Kurang Petugas</td>
-                          <td>Belum Selesai</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
   </div>
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
 
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
   <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
   <script src="js/sb-admin-2.min.js"></script>
-
   <script src="vendor/chart.js/Chart.min.js"></script>
-
   <script src="js/demo/chart-area-demo.js"></script>
   <script src="js/demo/chart-pie-demo.js"></script>
-
 </body>
 
 </html>
 <?php
 $content = ob_get_clean();
-$title = "Admin Dashboard";
+$title = "Dashboard";
 include "layout.php";
 ?>

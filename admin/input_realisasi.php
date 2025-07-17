@@ -37,7 +37,6 @@ ob_start();
 <body>
     <div id="content">
         <div id="content-wrapper" class="d-flex flex-column">
-            <?php include("header.php"); ?>
             <div class="container-fluid mt-4">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
@@ -58,8 +57,8 @@ ob_start();
                             <input type="hidden" name="mitra" value="<?= htmlspecialchars($mitra) ?>">
 
                             <div class="mb-3">
-                                <label class="form-label" for="usulan_anggaran">Usulan Anggaran</label>
-                                <input type="number" step="0.01" name="usulan_anggaran" id="usulan_anggaran" class="form-control form-control-lg" value="<?= htmlspecialchars($usulan_anggaran) ?>" readonly required>
+                                <label class="form-label" for="usulan_anggaran"></label>
+                                <input type="hidden" step="0.01" name="usulan_anggaran" id="usulan_anggaran" class="form-control form-control-lg" value="<?= htmlspecialchars($usulan_anggaran) ?>" readonly required>
                             </div>
 
                             <div class="mb-3">

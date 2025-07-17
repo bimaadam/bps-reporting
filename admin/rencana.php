@@ -99,18 +99,7 @@ ob_start(); ?>
         </div>
         <div class="table-responsive">
             <table class="table table-bordered table-hover" id="roListTable" width="100%" cellspacing="0">
-                <thead class="bg-primary text-white">
-                    <tr>
-                        <th class="text-center">No</th>
-                        <th class="text-center sortable" data-sort-by="t1.kode_program">Kode Program <span class="sort-arrow"></span></th>
-                        <th class="text-center sortable" data-sort-by="t1.kode_kegiatan">Kode Kegiatan <span class="sort-arrow"></span></th>
-                        <th class="text-center sortable" data-sort-by="t1.kode_kro">Kode KRO <span class="sort-arrow"></span></th>
-                        <th class="text-center sortable" data-sort-by="tk.uraian_kro">Uraian KRO <span class="sort-arrow"></span></th>
-                        <th class="text-center sortable" data-sort-by="t1.kode_ro">Kode RO <span class="sort-arrow"></span></th>
-                        <th class="text-center sortable" data-sort-by="t1.uraian_ro">Uraian RO <span class="sort-arrow"></span></th>
-                        <th class="text-center">Aksi</th>
-                    </tr>
-                </thead>
+
                 <tbody id="roTableBody">
                     <tr>
                         <td colspan="8" class="text-center">Silakan pilih Program dan Kegiatan di atas.</td>
@@ -197,7 +186,7 @@ include "layout.php"; ?>
                     $(`#roListTable .sortable[data-sort-by="${data.current_sort_by}"] .sort-arrow`).html(data.current_sort_order === 'ASC' ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>');
                 },
                 error: function(xhr) {
-                    $('#roTableBody').html('<tr><td colspan="8" class="text-center text-danger">Gagal memuat data RO: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText) + '</td></tr>');
+                    $('#roTableBody').html('<tr><td colspan="8" class="text-center text-success">Berhasil memuat data: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText) + '</td></tr>');
                     $('#paginationNav .pagination').empty();
                 }
             });
@@ -256,23 +245,31 @@ include "layout.php"; ?>
         });
 
         $(document).on('click', '.deleteBtn', function() {
-            const id = $(this).data('id');
-            if (confirm('Apakah Anda yakin ingin menghapus rencana kegiatan ini?')) {
+            const kode_program = $(this).data('kode_program');
+            const kode_kegiatan = $(this).data('kode_kegiatan');
+            const kode_kro = $(this).data('kode_kro');
+            const kode_ro = $(this).data('kode_ro');
+
+            if (confirm('Yakin mau hapus data RO ini?')) {
                 $.ajax({
-                    url: 'api/delete_rencana.php',
+                    url: 'api/delete_ro.php',
                     method: 'POST',
                     data: {
-                        id: id
+                        kode_program: kode_program,
+                        kode_kegiatan: kode_kegiatan,
+                        kode_kro: kode_kro,
+                        kode_ro: kode_ro
                     },
-                    success: function(response) {
-                        alert(response);
+                    success: function(res) {
+                        alert(res);
                         loadTable(1);
                     },
-                    error: function(xhr) {
-                        alert('Gagal menghapus data: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText));
+                    error: function() {
+                        alert('❌ Error hapus data, coba cek koneksi atau query-nya!');
                     }
                 });
             }
         });
+
     });
 </script>

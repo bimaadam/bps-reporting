@@ -145,22 +145,6 @@ ob_start();
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered" id="aktivitasTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Tahun</th>
-                            <th>Bulan</th>
-                            <th>Program</th>
-                            <th>Kegiatan</th>
-                            <th>KRO</th>
-                            <th>RO</th>
-                            <th>Nama Kegiatan</th>
-                            <th>Nama Aktivitas</th>
-                            <th>Organik</th>
-                            <th>Mitra</th>
-                            <th>Usulan Anggaran</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
                     <tbody>
                         <tr id="noDataRow">
                             <td colspan="12" class="text-center">Silakan pilih Program dan Kegiatan, lalu klik OK.</td>
@@ -273,17 +257,17 @@ include "layout.php";
             const id = $(this).data('id');
             if (confirm('Yakin mau hapus data ini?')) {
                 $.ajax({
-                    url: 'delete_ro.php',
+                    url: 'hapus_data_rencana.php',
                     method: 'POST',
                     data: {
                         id: id
                     },
                     success: function(response) {
                         alert(response);
-                        loadTable();
+                        loadTable()
                     },
                     error: function() {
-                        alert('❌ Gagal menghapus data.');
+                        alert('Gagal menghapus data.');
                     }
                 });
             }
