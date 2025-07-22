@@ -3,7 +3,7 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include "service/database.php";
+include "service/koneksi.php";
 $tahun              = $_GET['tahun'] ?? date('Y');
 $bulan              = $_GET['bulan'] ?? date('m');
 $kode_program       = $_GET['kode_program'] ?? '';
@@ -48,12 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     if ($stmt->execute()) {
-        $_SESSION['form_message'] = '✅ Data rencana berhasil disimpan!';
+        $_SESSION['form_message'] = 'Data rencana berhasil disimpan!';
         echo "<script>window.location.href='rencana.php';</script>";
         $stmt->close();
         exit();
     } else {
-        $_SESSION['form_message'] = '❌ Gagal menyimpan data: ' . $stmt->error;
+        $_SESSION['form_message'] = ' Gagal menyimpan data: ' . $stmt->error;
         echo "<script>window.location.href='rencana.php';</script>";
         $stmt->close();
         exit();

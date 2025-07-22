@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "service/database.php";
+include "service/koneksi.php";
 
 $available_limits = [10, 25, 50, 100];
 $limit = isset($_GET['limit']) && in_array((int)$_GET['limit'], $available_limits) ? (int)$_GET['limit'] : 25;

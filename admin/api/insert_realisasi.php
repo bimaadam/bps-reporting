@@ -1,5 +1,6 @@
 <?php
-include '../service/database.php';
+session_start();
+include '../service/koneksi.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -74,13 +75,15 @@ try {
     );
 
     if ($stmt->execute()) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Data berhasil disimpan',
-            'insert_id' => $stmt->insert_id
-        ]);
+        $_SESSION['form_message'] = 'Data realisasi berhasil disimpan!';
+        echo "<script>window.location.href='../realisasi.php';</script>";
+        $stmt->close();
+        exit();
     } else {
-        throw new Exception("Execute failed: {$stmt->error}");
+        $_SESSION['form_message'] = ' Gagal menyimpan data: ' . $stmt->error;
+        echo "<script>window.location.href='../realisasi.php';</script>";
+        $stmt->close();
+        exit;
     }
 } catch (Exception $e) {
     http_response_code(500);

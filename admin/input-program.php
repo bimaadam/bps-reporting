@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "service/database.php";
+include "service/koneksi.php";
 if (isset($_POST["simpan"])) {
     $kode_program = $_POST["kode_program"];
     $uraian_program = $_POST["uraian_program"];

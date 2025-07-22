@@ -20,10 +20,10 @@ $result = $stmt->get_result();
 
 if ($result->num_rows === 1) {
     $row = $result->fetch_assoc();
-    
+
     if ($password === $row['password']) {
         $_SESSION['username'] = $username;
-        header("Location: ../index.php"); 
+        header("Location: ../index.php");
         exit();
     } else {
         echo "Password salah";
@@ -34,4 +34,3 @@ if ($result->num_rows === 1) {
 
 $stmt->close();
 $conn->close();
-?>

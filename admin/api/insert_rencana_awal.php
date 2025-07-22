@@ -1,5 +1,5 @@
 <?php
-include '../service/database.php';
+include '../service/koneksi.php';
 
 $tahun = $_POST['tahun_kegiatan'];
 $bulan = $_POST['bulan_kegiatan'];
@@ -16,8 +16,7 @@ $stmt = $koneksi->prepare($query);
 $stmt->bind_param("iissss", $tahun, $bulan, $kode_program, $kode_kegiatan, $kode_kro, $kode_ro);
 
 if ($stmt->execute()) {
-    echo "Berhasil insert awal";
+  echo "Berhasil insert awal";
 } else {
-    echo "Gagal insert awal: " . $stmt->error;
+  echo "Gagal insert awal: " . $stmt->error;
 }
-?>

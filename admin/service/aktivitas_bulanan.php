@@ -1,7 +1,8 @@
 <?php
-require_once 'database.php';
+require_once 'koneksi.php';
 
-function simpanAktivitasBulanan($data, $file) {
+function simpanAktivitasBulanan($data, $file)
+{
     global $conn;
 
     $tahun_kegiatan = $data['tahun_kegiatan'];
@@ -32,9 +33,8 @@ function simpanAktivitasBulanan($data, $file) {
     $stmt->bind_param("isissiiidddss", $tahun_kegiatan, $bulan_kegiatan, $no, $nama_kegiatan, $nama_aktivitas, $organik, $mitra, $usulan_anggaran, $realisasi_anggaran, $realisasi_kegiatan, $kendala, $solusi, $input_text_file);
 
     if ($stmt->execute()) {
-    echo "Data berhasil disimpan!";
-} else {
-    echo "Error: " . $stmt->error;
-}
-
+        echo "Data berhasil disimpan!";
+    } else {
+        echo "Error: " . $stmt->error;
+    }
 }

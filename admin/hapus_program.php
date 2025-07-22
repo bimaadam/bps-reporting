@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "service/database.php";
+include "service/koneksi.php";
 
 // Validasi data GET
 if (isset($_GET['id'])) {

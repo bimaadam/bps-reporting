@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "service/database.php";
+include "service/koneksi.php";
 
 // Cek apakah parameter dikirim
 if (isset($_GET['kode_kegiatan'])) {

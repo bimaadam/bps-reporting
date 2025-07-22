@@ -1,8 +1,14 @@
 <?php
 
-include "service/database.php";
+session_start();
+include "service/koneksi.php";
+
 
 $message = '';
+if (isset($_SESSION['form_message'])) {
+    $message = $_SESSION['form_message'];
+    unset($_SESSION['form_message']);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kode_program_ajax_submit'])) {
 
@@ -47,9 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kode_program_ajax_sub
     )";
 
     if (mysqli_query($koneksi, $query)) {
-        echo "✅ Data berhasil disimpan!";
+        echo "Data berhasil disimpan!";
     } else {
-        echo "❌ Gagal simpan data: " . mysqli_error($koneksi);
+        echo " Gagal simpan data: " . mysqli_error($koneksi);
     }
     exit();
 }

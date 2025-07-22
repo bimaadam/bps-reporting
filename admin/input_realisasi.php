@@ -106,14 +106,14 @@ ob_start();
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
-                            alert('✅ ' + response.message);
+                            alert('' + response.message);
                             window.location.href = '../admin/realisasi.php';
                         } else {
-                            alert('❌ Gagal simpan data: ' + response.message);
+                            alert('Gagal simpan data: ' + response.message);
                         }
                     },
                     error: function(xhr, status, error) {
-                        alert('❌ Terjadi kesalahan saat menyimpan data.');
+                        alert('Terjadi kesalahan saat menyimpan data.');
                         console.error("AJAX Error:", status, error, xhr.responseText);
                     }
                 });

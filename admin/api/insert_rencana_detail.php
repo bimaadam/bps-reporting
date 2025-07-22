@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-include '../service/database.php';
+include '../service/koneksi.php';
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -8,11 +8,19 @@ ini_set('display_errors', 1);
 try {
     // Validasi input
     $required = [
-        'tahun_kegiatan', 'bulan_kegiatan', 'kode_program', 'kode_kegiatan', 
-        'kode_kro', 'kode_ro', 'nama_kegiatan', 'nama_aktivitas', 
-        'organik', 'mitra', 'usulan_anggaran'
+        'tahun_kegiatan',
+        'bulan_kegiatan',
+        'kode_program',
+        'kode_kegiatan',
+        'kode_kro',
+        'kode_ro',
+        'nama_kegiatan',
+        'nama_aktivitas',
+        'organik',
+        'mitra',
+        'usulan_anggaran'
     ];
-    
+
     foreach ($required as $field) {
         if (!isset($_POST[$field]) || $_POST[$field] === '') {
             throw new Exception("Field $field harus diisi");
@@ -23,18 +31,18 @@ try {
     $tahun = (int)$_POST['tahun_kegiatan'];
     $bulan = (int)$_POST['bulan_kegiatan'];
     $tanggal_kegiatan = date('Y-m-d', strtotime("$tahun-$bulan-01"));
-    
+
     $query = "INSERT INTO tbl_rencana_anggaran (
         tahun_kegiatan, bulan_kegiatan, kode_program, kode_kegiatan,
         kode_kro, kode_ro, nama_kegiatan, nama_aktivitas,
         organik, mitra, usulan_anggaran
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     $stmt = $koneksi->prepare($query);
     if (!$stmt) {
         throw new Exception("Prepare failed: {$koneksi->error}");
     }
-    
+
     $kode_program = $_POST['kode_program'];
     $kode_kegiatan = $_POST['kode_kegiatan'];
     $kode_kro = $_POST['kode_kro'];
@@ -47,23 +55,23 @@ try {
 
     $stmt->bind_param(
         "ssssssssiid",
-        $tahun,         
-        $tanggal_kegiatan, 
+        $tahun,
+        $tanggal_kegiatan,
         $kode_program,
         $kode_kegiatan,
         $kode_kro,
         $kode_ro,
-        $nama_kegiatan,  
-        $nama_aktivitas, 
+        $nama_kegiatan,
+        $nama_aktivitas,
         $organik,
         $mitra,
         $usulan_anggaran
     );
-    
-    
+
+
     if ($stmt->execute()) {
         echo json_encode([
-            'success' => true, 
+            'success' => true,
             'message' => 'Data berhasil disimpan',
             'insert_id' => $stmt->insert_id
         ]);
@@ -73,7 +81,7 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => $e->getMessage(),
         'error_details' => $koneksi->error ?? null
     ]);

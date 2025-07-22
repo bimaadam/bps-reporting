@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include 'service/database.php';
+include 'service/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = mysqli_real_escape_string($koneksi, $_POST['id']);

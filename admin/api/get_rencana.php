@@ -1,5 +1,5 @@
 <?php
-include '../service/database.php';
+include '../service/koneksi.php';
 
 $limit = 10;
 $page = isset($_POST['page']) ? $_POST['page'] : 1;

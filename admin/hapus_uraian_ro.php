@@ -1,5 +1,5 @@
 <?php
-include '../service/database.php';
+include '../service/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $kode_program = $_POST['kode_program'] ?? '';

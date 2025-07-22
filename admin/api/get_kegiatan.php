@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include "../service/database.php";
+include "../service/koneksi.php";
 if (!$koneksi) {
     echo "<option value=''>Error: Koneksi database gagal.</option>";
     exit();
