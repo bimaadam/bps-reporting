@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+session_start();
 
 // Validasi parameter GET
 $required_params = ['tahun_kegiatan', 'bulan_kegiatan', 'kode_program', 'kode_kegiatan', 'kode_kro', 'kode_ro'];

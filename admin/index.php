@@ -234,6 +234,12 @@ $bulan_nama = [
     .chart-container {
       position: relative;
       height: 300px;
+      margin-bottom: 23%;
+    }
+
+    .chart-containers {
+      position: relative;
+      height: 300px;
     }
   </style>
 </head>
@@ -390,7 +396,7 @@ $bulan_nama = [
             </h6>
           </div>
           <div class="card-body">
-            <div class="chart-container">
+            <div class="chart-containers">
               <canvas id="myPieChart"></canvas>
             </div>
             <div class="mt-4 text-center small">
@@ -545,7 +551,8 @@ $bulan_nama = [
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
   <script src="js/sb-admin-2.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 
   <script>
     // Area Chart
@@ -669,6 +676,7 @@ $bulan_nama = [
     });
 
     // Pie Chart
+
     var ctx2 = document.getElementById("myPieChart");
     var organik = <?= $organik ?>;
     var mitra = <?= $mitra ?>;
